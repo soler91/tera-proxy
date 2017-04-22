@@ -318,7 +318,7 @@ for (const server of config.servers) {
 if (config.noHostsEdit) {
   log.info('skipping hosts override');
 } else {
-  const hosts = require('./hosts');
+  const hosts = require('../lib/hosts');
   const hostsPath = config.hostsPath || hosts.defaultPath;
 
   log.trace({ path: hostsPath }, 'checking hosts file');
