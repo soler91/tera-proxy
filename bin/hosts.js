@@ -1,100 +1,240 @@
-// windows-only, synchronous version of `hostile` with slight modifications
-var fs = require('fs');
-var path = require('path');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const readline = require('readline');
+const writeFileAtomic = require('write-file-atomic');
 
-var HOSTS = path.join(
-	process.env.SystemRoot || path.join(process.env.SystemDrive || 'C:', 'Windows'),
-	'/System32/drivers/etc/hosts'
-);
+const HOSTS = (() => {
+  if (process.platform !== 'win32') return '/etc/hosts';
 
-exports.get = function () {
-	var lines = [];
-	try {
-		fs.readFileSync(HOSTS, {encoding: 'utf8'})
-		.replace(/\r?\n$/, '')
-		.split(/\r?\n/)
-		.forEach(function (line) {
-			var matches = /^\s*?([^#]+?)\s+([^#]+?)$/.exec(line);
-			if (matches && matches.length === 3) {
-				// Found a hosts entry
-				var ip = matches[1];
-				var host = matches[2];
-				lines.push([ip, host]);
-			} else {
-				// Found a comment, blank line, or something else
-				lines.push(line);
-			}
-		});
-	} catch (e) {
-		// ENOENT: File doesn't exist (equivalent to empty file)
-		// Otherwise, throw
-		if (e.code !== 'ENOENT') {
-			throw e;
-		}
-	}
-	return lines;
-};
+  return path.join(
+    process.env.SystemRoot || path.join(process.env.SystemDrive || 'C:', 'Windows'),
+    '/System32/drivers/etc/hosts'
+  );
+})();
 
-exports.set = function (ip, host) {
-	var lines = exports.get();
+function onlyOnce(cb) {
+  let called = false;
 
-	// Try to update entry, if host already exists in file
-	var didUpdate = false;
-	lines = lines.map(function (line) {
-		if (Array.isArray(line) && line[1] === host) {
-			line[0] = ip;
-			didUpdate = true;
-		}
-		return line;
-	});
+  return (...args) => {
+    if (!called) {
+      called = true;
+      cb(...args);
+    }
+  };
+}
 
-	// If entry did not exist, let's add it
-	if (!didUpdate) {
-		lines.push([ip, host]);
-	}
+class HostsLine {
+  constructor(line) {
+    this.line = line;
 
-	exports.writeFile(lines);
-};
+    const commentIndex = line.indexOf('#');
 
-exports.remove = function (ip, host) {
-	var lines = exports.get();
+    const content = (commentIndex === -1) ? line : line.slice(0, commentIndex);
+    const comment = (commentIndex === -1) ? null : line.slice(commentIndex + 1);
 
-	// Try to remove entry, if it exists
-	lines = lines.filter(function (line) {
-		return !(Array.isArray(line) && line[0] === ip && line[1] === host);
-	});
+    const hostList = content.trim().split(/\s+/);
+    const ip = hostList.shift();
 
-	exports.writeFile(lines);
-};
+    if (hostList.length > 0) {
+      Object.assign(this, { ip, hostList, comment });
+    }
+  }
 
-exports.writeFile = function (lines) {
-	var data = '';
-	lines.forEach(function (line) {
-		if (Array.isArray(line)) {
-			line = line[0] + ' ' + line[1];
-		}
-		data += line + '\r\n';
-	});
+  remove(host) {
+    host = host.toLowerCase();
 
-	// Get mode (or set to rw-rw-rw-); check read-only
-	var mode;
-	try {
-		mode = fs.statSync(HOSTS).mode;
-		if (!(mode & 128)) { // 0200 (owner, write)
-			// FIXME generate fake EACCES
-			var err = new Error('EACCES: Permission denied');
-			err.code = 'EACCES';
-			err.path = HOSTS;
-			throw err;
-		}
-	} catch (e) {
-		if (e.code === 'ENOENT') {
-			mode = 33206; // 0100666 (regular file, rw-rw-rw-)
-		} else {
-			throw e;
-		}
-	}
+    const hostList = this.hostList.filter(h => h.toLowerCase() !== host);
+    if (hostList.length > 0) {
+      this.hostList = hostList;
+    } else {
+      this.ip = null;
+      this.hostList = null;
+    }
 
-	// Write file
-	fs.writeFileSync(HOSTS, data, {mode: mode});
+    this.line = null;
+  }
+
+  isEmpty() {
+    return (this.line === null) && !this.ip && !this.hostList && !this.comment;
+  }
+
+  toString() {
+    if (this.line !== null) {
+      return this.line;
+    }
+
+    if (this.ip && this.hostList) {
+      const comment = (this.comment ? ` #${this.comment}` : '');
+      return `${this.ip} ${this.hostList.join(' ')}${comment}`;
+    }
+
+    if (this.comment) {
+      return `#${this.comment}`;
+    }
+
+    return '';
+  }
+}
+
+class HostsStore {
+  constructor(lines = []) {
+    this.lines = lines;
+    this.map = new Map();
+
+    for (const line of lines) {
+      if (line.ip) {
+        for (const host of line.hostList) {
+          this.map.set(host.toLowerCase(), line);
+        }
+      }
+    }
+  }
+
+  get(host) {
+    host = host.toLowerCase();
+    return this.map.has(host) && this.map.get(host).ip;
+  }
+
+  set(host, ip) {
+    host = host.toLowerCase();
+
+    if (this.map.has(host)) {
+      const line = this.map.get(host);
+      if (line.ip === ip) return;
+      line.remove(host);
+      this.map.delete(host);
+    }
+
+    if (ip) {
+      const line = new HostsLine(`${ip} ${host}`);
+      this.lines.push(line);
+      this.map.set(host, line);
+    }
+  }
+
+  remove(host) {
+    this.set(host, null);
+  }
+
+  toString() {
+    return (
+      this.lines
+        .filter(line => !line.isEmpty())
+        .map(line => `${line}${os.EOL}`)
+        .join('')
+    );
+  }
+}
+
+module.exports = {
+  get defaultPath() {
+    return HOSTS;
+  },
+
+  get(hostsPath, cb) {
+    if (typeof hostsPath === 'function') {
+      cb = hostsPath;
+      hostsPath = HOSTS;
+    }
+
+    cb = onlyOnce(cb);
+
+    const lines = [];
+
+    const input = fs.createReadStream(hostsPath);
+    const reader = readline.createInterface({ input });
+
+    input.on('error', (err) => {
+      if (err.code === 'ENOENT') {
+        // file doesn't exist - equivalent to empty file
+        cb(null, []);
+      } else {
+        // otherwise, let caller handle it
+        cb(err);
+      }
+    });
+
+    reader.on('line', (line) => {
+      lines.push(new HostsLine(line));
+    });
+
+    reader.on('close', () => {
+      cb(null, new HostsStore(lines));
+    });
+  },
+
+  getSync(hostsPath) {
+    try {
+      return new HostsStore(
+        fs.readFileSync(hostsPath || HOSTS, { encoding: 'utf8' })
+          .replace(/\r?\n$/, '') // remove trailing newline
+          .split(/\r?\n/)
+          .map(line => new HostsLine(line))
+      );
+    } catch (e) {
+      // ENOENT: file doesn't exist (equivalent to empty file)
+      // if anything else, throw
+      if (e.code !== 'ENOENT') {
+        throw e;
+      }
+    }
+
+    return new HostsStore();
+  },
+
+  write(hostsPath, hostsStore, cb) {
+    if (hostsPath instanceof HostsStore) {
+      cb = hostsStore;
+      hostsStore = hostsPath;
+      hostsPath = HOSTS;
+    }
+
+    fs.stat(hostsPath, (err, stats) => {
+      let mode = 33188; // 0100644 (regular file, rw-r--r--)
+
+      if (err) {
+        if (err.code !== 'ENOENT') {
+          return cb(err);
+        }
+      } else if (!(stats.mode & 128)) { // 0200 (owner, write)
+        const err = new Error('EACCES: Permission denied');
+        err.code = 'EACCES';
+        err.path = hostsPath;
+        return cb(err);
+      } else {
+        mode = stats.mode;
+      }
+
+      writeFileAtomic(hostsPath, hostsStore.toString(), { mode }, cb);
+    });
+  },
+
+  writeSync(hostsPath, hostsStore) {
+    if (hostsPath instanceof HostsStore) {
+      hostsStore = hostsPath;
+      hostsPath = HOSTS;
+    }
+
+    let mode = 33188; // 0100644 (regular file, rw-r--r--)
+
+    try {
+      const stats = fs.statSync(hostsPath);
+
+      if (!(stats.mode & 128)) { // 0200 (owner, write)
+        const err = new Error('EACCES: Permission denied');
+        err.code = 'EACCES';
+        err.path = hostsPath;
+        throw err;
+      }
+
+      mode = stats.mode;
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        throw err;
+      }
+    }
+
+    writeFileAtomic.sync(hostsPath, hostsStore.toString(), { mode });
+  }
 };
