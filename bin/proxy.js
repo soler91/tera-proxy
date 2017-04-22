@@ -364,14 +364,15 @@ if (config.noHostsEdit) {
   process.on('exit', () => {
     try {
       hostsStore = hosts.getSync(hostsPath);
-      for (const { from } of overrides) {
-        originals[from] = hostsStore.get(from);
+      for (const { from, to } of overrides) {
+        const current = hostsStore.get(from);
+        if (current !== to) originals.set(from, current);
       }
     } catch (err) {
       // ignore
     }
 
-    for (const [from, orig] in originals) {
+    for (const [from, orig] of originals) {
       hostsStore.set(from, orig);
     }
 

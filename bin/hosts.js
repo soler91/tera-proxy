@@ -235,6 +235,10 @@ module.exports = {
       }
     }
 
-    writeFileAtomic.sync(hostsPath, hostsStore.toString(), { mode });
+    // fix strange bug where writing empty hosts causes EPERM on Windows 10
+    const text = hostsStore.toString();
+    const data = (/\S/.test(text) ? text : `# empty${os.EOL}`);
+
+    writeFileAtomic.sync(hostsPath, data, { mode });
   }
 };
