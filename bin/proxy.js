@@ -89,6 +89,30 @@ function tryRequire(name) {
   }
 }
 
+function* objectKeys(obj) {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      yield key;
+    }
+  }
+}
+
+function* objectValues(obj) {
+  for (const key of objectKeys(obj)) {
+    yield obj[key];
+  }
+}
+
+function* objectIter(obj) {
+  for (const key of objectKeys(obj)) {
+    yield [key, obj[key]];
+  }
+}
+
+function objectMap(obj, func) {
+  return [...objectIter(obj)].map(func);
+}
+
 // -----------------------------------------------------------------------------
 
 // parse args
@@ -199,7 +223,7 @@ log.debug({ logFilePath, consoleLogger }, 'logging');
 // read configuration
 const config = (() => {
   if (!argv.config) {
-    return { servers: '*' };
+    return { regions: '*' };
   }
 
   const configPath = path.resolve(argv.config);
@@ -262,36 +286,36 @@ log.info({ config }, argv.config
   : 'using default config'
 );
 
-if (!config.servers) {
-  log.error('no custom servers specified; please provide at least one (or "*")');
+// normalize servers
+if (config.regions === '*') {
+  config.regions = Object.keys(regions).map(region => ({ region }));
+} else if (typeof config.regions !== 'object') {
+  log.error('"regions" must be an object or "*"');
   process.exitCode = 1;
   return;
 }
 
-// normalize servers
-if (config.servers === '*') {
-  config.servers = Object.keys(regions).map(region => ({ region }));
-}
+for (const [name, region] of objectIter(config.regions)) {
+  config.regions[name] = Object.assign(
+    // base defaults
+    {
+      listenHost: '127.0.0.1',
+      servers: '*',
+    },
 
-for (const opts of config.servers) {
-  // regionName
-  if (!opts.region) {
-    opts.regionName = '???';
-  } else {
-    opts.regionName = opts.region;
-    if (!regions[opts.region]) opts.regionName += '*';
-  }
+    // region defaults
+    regions[name],
 
-  // listenHost
-  const region = regions[opts.regionName] || {};
-  opts.sls = opts.sls || region.sls;
-  opts.listenHost = opts.listenHost || region.listenHost || '127.0.0.1';
+    // provided options
+    region,
 
-  // servers
-  opts.servers = opts.servers || '*';
-  opts.slsProxy = null;
-  opts.httpsProxy = null;
-  opts.gameProxies = new Map();
+    // application properties
+    {
+      slsProxy: null,
+      httpsProxy: null,
+      gameProxies: new Map(),
+    }
+  );
 }
 
 // -----------------------------------------------------------------------------
@@ -302,6 +326,9 @@ const { Connection, RealClient } = require('tera-proxy-game');
 // preload modules
 const modules = (() => {
   const moduleDir = path.join(__dirname, 'node_modules');
+
+  log.info({ dir: moduleDir }, 'searching for modules');
+
   try {
     return (
       fs.readdirSync(moduleDir)
@@ -315,6 +342,7 @@ const modules = (() => {
 })();
 
 if (!modules) {
+  log.error('no modules to load; exiting');
   process.exitCode = 1;
   return;
 }
@@ -332,10 +360,10 @@ for (const name of modules) {
 }
 
 // set up sls proxies
-for (const server of config.servers) {
-  const { sls } = server;
+for (const region of objectValues(config.regions)) {
+  const { sls } = region;
   const opts = (typeof sls === 'string') ? { url: sls } : sls;
-  server.slsProxy = new SlsProxy(opts);
+  region.slsProxy = new SlsProxy(opts);
 }
 
 // -----------------------------------------------------------------------------
@@ -363,9 +391,9 @@ if (config.noHostsEdit) {
 
   const originals = new Map();
 
-  const overrides = config.servers.map((server) => ({
-    from: server.slsProxy.host,
-    to: server.listenHost,
+  const overrides = objectMap(config.regions, ([, region]) => ({
+    from: region.slsProxy.host,
+    to: region.listenHost,
   }));
 
   log.debug({ overrides }, 'settings hosts overrides');
@@ -426,8 +454,8 @@ if (config.noHostsEdit) {
     } catch (err) {
     }
 
-    for (const s of config.servers || []) {
-      const { slsProxy, httpsProxy, gameProxies } = s;
+    for (const region of objectValues(config.regions)) {
+      const { slsProxy, httpsProxy, gameProxies } = region;
 
       if (slsProxy) slsProxy.close();
       if (httpsProxy) httpsProxy.close();
@@ -468,24 +496,25 @@ if (config.noHostsEdit) {
 
 // -----------------------------------------------------------------------------
 
-function makeSlsProxy(opts, cb) {
-  const { region, slsProxy } = opts;
-  const servers = (opts.servers !== '*') ? opts.servers : {};
+function makeSlsProxy(region, data, cb) {
+  const { slsProxy } = data;
+  const all = (data.servers === '*');
+  const servers = (!all ? data.servers : {});
 
   slsProxy.fetch((err, gameServers) => {
     if (err) return cb(err);
 
     log.debug({ region, gameServers }, 'retrieved official server list');
 
-    if (opts.servers === '*') {
-      for (const id in gameServers) {
+    if (all) {
+      for (const id of objectKeys(gameServers)) {
         servers[id] = {};
       }
     }
 
     const result = new Map();
 
-    for (const id in servers) {
+    for (const [id, server] of objectIter(servers)) {
       const target = gameServers[id];
       if (!target) {
         log.warn({ region, id }, 'server not found; skipping');
@@ -495,7 +524,7 @@ function makeSlsProxy(opts, cb) {
       const settings = Object.assign({
         connectHost: target.ip,
         connectPort: target.port,
-        listenHost: opts.listenHost,
+        listenHost: data.listenHost,
         listenPort: BASE_PORT + parseInt(id, 10),
       }, servers[id]);
 
@@ -591,16 +620,16 @@ function makeHttpsProxy(server) {
   return httpsProxy;
 }
 
-for (const s of config.servers) {
-  const { region, slsProxy, listenHost } = s;
-
-  makeSlsProxy(s, (err, res) => {
+for (const [region, data] of objectIter(config.regions)) {
+  makeSlsProxy(region, data, (err, res) => {
     if (err) {
-      log.error({ region, err }, 'error setting up sls proxy');      
+      log.error({ region, data, err }, 'error setting up sls proxy');      
       return;
     }
 
     // sls proxy
+    const { slsProxy, listenHost } = data;
+
     log.debug({ region, host: listenHost }, 'starting sls proxy servers');
 
     slsProxy.listen(listenHost, () => {
@@ -615,7 +644,7 @@ for (const s of config.servers) {
         log.info({ region, address: serverAddress(httpsProxy) }, 'https proxy server listening');
       });
 
-      s.httpsProxy = httpsProxy;
+      data.httpsProxy = httpsProxy;
     }
 
     // game proxies
@@ -628,7 +657,7 @@ for (const s of config.servers) {
         log.info({ region, id, address: serverAddress(gameProxy) }, 'game proxy server listening');
       });
 
-      s.gameProxies.set(id, gameProxy);
+      data.gameProxies.set(id, gameProxy);
     }
   });
 }
