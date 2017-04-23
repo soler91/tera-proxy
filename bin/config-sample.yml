@@ -1,0 +1,70 @@
+# This is an example configuration file for `tera-proxy`.
+# In most cases, you will probably not need to set up a custom config,
+# but in case you do, this is an exhaustive example of all supported
+# settings. Note that almost all of them are optional, so feel free to
+# omit any settings you don't need to change from the default.
+
+# If you are unfamiliar with YAML syntax, note that leading whitespace
+# is significant. Everything on the same level must have the same
+# amount of leading whitespace. I recommend two spaces per level, but
+# anything, including tabs, is fine as long as you are consistent.
+
+# Change this to true to disable hosts editing (default: false).
+# If you do this, you'll need to make sure your hosts file is already
+# edited, either by you or another program. Otherwise, the SLS proxy
+# won't work, so custom servers can't be added.
+noHostsEdit: false
+
+# Set this to the path of your hosts file. `tera-proxy` should guess
+# this correctly for most users, but in case it doesn't work for you,
+# you can specify the correct path here.
+hostsPath: C:\WINDOWS\System32\drivers\etc\hosts
+
+# List all the regions you want to proxy. You can set this to "*" if
+# you want to proxy ALL regions. Otherwise, it must be an object.
+regions:
+
+  # The key for each region object should be one of the following:
+  #   EU, JP, KR, NA, RU, TW
+  # Using any of these will provide defaults for all sub-options.
+  # However, if the region name isn't recognized, you are required to
+  # set all of the sub-options.
+  NA:
+
+    # This sets the URL for the server list. You can also specify an
+    # object with { hostname, port, pathname } to be passed to the
+    # SlsProxy constructor (see `tera-proxy-sls`).
+    sls: http://sls.service.enmasse.com:8080/servers/list.en
+
+    # Sets the hostname for the SLS proxy to listen on. Note that the
+    # port will be the same as the one in the provided SLS URL.
+    listenHost: 127.0.0.5
+    
+    # Sets which servers to run game proxies for. You can set this to
+    # "*" if you want to proxy ALL servers, otherwise it must be an
+    # object.
+    servers:
+
+      # The key for each server object must be the ID of the server to
+      # proxy. You'll need to look at the server list to get this.
+      4009:
+
+        # `name` and `overwrite` will be passed to `SlsProxy`. These
+        # dictate, respectively, the name of the custom server in the
+        # server list and whether the custom server should replace the
+        # original or instead show up as a copy.
+        name: Celestial Hills
+        overwrite: true
+
+        # These set the host and port for the game proxy server to
+        # listen on. These can be anything as long as you make sure
+        # they do not conflict with any other servers or services.
+        listenHost: 127.0.0.5
+        listenPort: 34009
+
+        # The set the host and port for the proxy to connect to. For
+        # most users this should stay at the default, which is to copy
+        # the host and port from the official server list, but in rare
+        # cases you might want to set this to something else.
+        connectHost: 208.67.49.68
+        connectPort: 10001
