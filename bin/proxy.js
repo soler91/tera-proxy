@@ -295,7 +295,8 @@ log.info({ config }, argv.config
 
 // normalize servers
 if (config.regions === '*') {
-  config.regions = Object.keys(regions).map(region => ({ region }));
+  config.regions = {};
+  for (const key of objectKeys(regions)) config.regions[key] = '*';
 } else if (typeof config.regions !== 'object') {
   log.error('"regions" must be an object or "*"');
   process.exitCode = 1;
@@ -314,7 +315,7 @@ for (const [name, region] of objectIter(config.regions)) {
     regions[name],
 
     // provided options
-    region,
+    (typeof region === 'object') ? region : {},
 
     // application properties
     {
@@ -632,7 +633,7 @@ for (const [region, data] of objectIter(config.regions)) {
 
     // https proxy
     if (region === 'JP' || region === 'KR' || region === 'TW') {
-      const httpsProxy = makeHttpsProxy(s);
+      const httpsProxy = makeHttpsProxy(data);
 
       httpsProxy.on('listening', () => {
         log.info({ region, address: serverAddress(httpsProxy) }, 'https proxy server listening');
