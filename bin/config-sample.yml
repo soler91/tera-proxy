@@ -49,12 +49,12 @@ regions:
       # proxy. You'll need to look at the server list to get this.
       4009:
 
-        # `name` and `overwrite` will be passed to `SlsProxy`. These
+        # `name` and `keepOriginal` will be passed to `SlsProxy`. These
         # dictate, respectively, the name of the custom server in the
         # server list and whether the custom server should replace the
         # original or instead show up as a copy.
         name: Celestial Hills
-        overwrite: true
+        keepOriginal: false
 
         # These set the host and port for the game proxy server to
         # listen on. These can be anything as long as you make sure
