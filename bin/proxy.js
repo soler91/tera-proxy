@@ -189,6 +189,7 @@ const argv = (() => {
   return {
     v,
     color,
+    raw: !!parsed.get('raw'),
     config: parsed.get('config'),
   };
 })();
@@ -200,9 +201,17 @@ const logger = require('baldera-logger');
 
 const consoleLogger = logger.parent.streams.find(stream => stream.name === 'console');
 if (consoleLogger) {
-  const { stream } = consoleLogger;
-  if (argv.v != null) stream.level = argv.v;
-  if (argv.color != null) stream.colors = argv.color;
+  if (!argv.raw) {
+    const { stream } = consoleLogger;
+    if (argv.v != null) stream.level = argv.v;
+    if (argv.color != null) stream.colors = argv.color;
+  } else {
+    consoleLogger.raw = false;
+    consoleLogger.stream = process.stdout;
+
+    const level = 3 - (argv.v || 0);
+    logger.parent.levels('console', level * 10);
+  }
 }
 
 const logFilePath = path.join(__dirname, 'baldera.log');
