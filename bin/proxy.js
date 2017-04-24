@@ -389,8 +389,6 @@ if (config.noHostsEdit) {
     return;
   }
 
-  const originals = new Map();
-
   const overrides = objectMap(config.regions, ([, region]) => ({
     from: region.slsProxy.host,
     to: region.listenHost,
@@ -399,7 +397,6 @@ if (config.noHostsEdit) {
   log.debug({ overrides }, 'settings hosts overrides');
 
   for (const { from, to } of overrides) {
-    originals.set(from, hostsStore.get(from));
     hostsStore.set(from, to);
   }
 
@@ -418,18 +415,8 @@ if (config.noHostsEdit) {
   log.info('successfully edited hosts file');
 
   process.on('exit', () => {
-    try {
-      hostsStore = hosts.getSync(hostsPath);
-      for (const { from, to } of overrides) {
-        const current = hostsStore.get(from);
-        if (current !== to) originals.set(from, current);
-      }
-    } catch (err) {
-      // ignore
-    }
-
-    for (const [from, orig] of originals) {
-      hostsStore.set(from, orig);
+    for (const { from } of overrides) {
+      hostsStore.remove(from);
     }
 
     try {
