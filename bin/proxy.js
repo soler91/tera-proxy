@@ -196,16 +196,15 @@ const argv = (() => {
 
 // -----------------------------------------------------------------------------
 
+if (argv.v != null) process.env['BALDERA_LOG_LEVEL'] = String(argv.v);
+if (argv.color != null) process.env['BALDERA_LOG_COLORS'] = (argv.color ? '1' : '0');
+
 // set up logger
 const logger = require('baldera-logger');
 
-const consoleLogger = logger.parent.streams.find(stream => stream.name === 'console');
-if (consoleLogger) {
-  if (!argv.raw) {
-    const { stream } = consoleLogger;
-    if (argv.v != null) stream.level = argv.v;
-    if (argv.color != null) stream.colors = argv.color;
-  } else {
+if (argv.raw) {
+  const consoleLogger = logger.parent.streams.find(stream => stream.name === 'console');
+  if (consoleLogger) {
     consoleLogger.raw = false;
     consoleLogger.stream = process.stdout;
 
@@ -224,8 +223,7 @@ logger.parent.addStream({
 
 const log = logger('tera-proxy');
 
-log.debug({ argv, argv_: process.argv }, 'startup');
-log.debug({ logFilePath, consoleLogger }, 'logging');
+log.debug({ logFilePath, argv, argv_: process.argv }, 'startup');
 
 // -----------------------------------------------------------------------------
 
