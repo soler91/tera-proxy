@@ -30,8 +30,7 @@ For an even smaller install, you can also add `--no-optional` with the following
 If you just want to proxy all servers on one region (such as NA), here's a short `config.yml` you could use:
 
 ```yml
-regions:
-  NA: "*"
+regions: { NA }
 ```
 
 ## Usage
