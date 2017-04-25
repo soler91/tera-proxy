@@ -476,7 +476,7 @@ if (config.noHostsEdit) {
     cleanExit();
 
     if (process.platform === 'win32') {
-      process.stdin.end();
+      process.stdin.pause();
     }
 
     setTimeout(() => {
