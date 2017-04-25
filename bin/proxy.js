@@ -371,6 +371,7 @@ for (const name of modules) {
 for (const region of objectValues(config.regions)) {
   const { sls } = region;
   const opts = (typeof sls === 'string') ? { url: sls } : sls;
+  if (region.slsAddress) opts.address = region.slsAddress;
   region.slsProxy = new SlsProxy(opts);
 }
 
@@ -488,6 +489,14 @@ if (config.noHostsEdit) {
   process.on('SIGINT', dirtyExit);
   process.on('SIGTERM', dirtyExit);
 })();
+
+// -----------------------------------------------------------------------------
+
+// set dns servers
+if (config.dnsServers) {
+  const dns = require('dns');
+  dns.setServers(config.dnsServers);
+}
 
 // -----------------------------------------------------------------------------
 

@@ -20,6 +20,14 @@ noHostsEdit: false
 # you can specify the correct path here.
 hostsPath: C:\WINDOWS\System32\drivers\etc\hosts
 
+# When proxying the server list (SLS), a DNS lookup is performed on the
+# SLS hostname, which is where requests are proxied to. If you want to
+# specify the DNS servers to use for hostname resolution, you can list
+# them here.
+dnsServers:
+- 8.8.8.8
+- 8.8.4.4
+
 # List all the regions you want to proxy. You can set this to "*" if
 # you want to proxy ALL regions. Otherwise, it must be an object.
 regions:
@@ -32,9 +40,14 @@ regions:
   NA:
 
     # This sets the URL for the server list. You can also specify an
-    # object with { hostname, port, pathname } to be passed to the
-    # SlsProxy constructor (see `tera-proxy-sls`).
+    # object with { hostname, port, pathname, address } to be passed to
+    # the SlsProxy constructor (see `tera-proxy-sls`).
     sls: http://sls.service.enmasse.com:8080/servers/list.en
+
+    # In case you want to use the default SLS for the region but also
+    # want to specify the IP address to skip DNS resolution, you can
+    # set it here. Note that this always overrides `sls.address`.
+    slsAddress: 208.67.49.148
 
     # Sets the hostname for the SLS proxy to listen on. Note that the
     # port will be the same as the one in the provided SLS URL.
