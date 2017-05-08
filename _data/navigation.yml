@@ -1,0 +1,27 @@
+# main links
+main:
+  - title: "User Guide"
+    url: /user-guide
+  - title: "Developer Guide"
+    url: /developer-guide
+  - title: "Changelog"
+    url: /changes
+  - title: "Module Directory"
+    url: /modules
+  - title: '<i class="fa fa-github fa-lg" aria-hidden="true"></i> GitHub'
+    url: https://github.com/meishuu/tera-proxy
+
+# changes links
+changes:
+  - title: "Pre-release"
+    children:
+      - title: "1.0.0"
+        url: /changes/v1.0.0-pre/
+  - title: "Current Patch"
+    children:
+      - title: "0.2.0 - Valkyrie"
+        url: /changes/v0.2.0/
+  - title: "Old Versions"
+    children:
+      - title: "0.1.0"
+        url: /changes/v0.1.0/

@@ -1,0 +1,39 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+
+@charset "utf-8";
+
+@import "minimal-mistakes";
+
+@mixin avatar-size($font-size) {
+  .avatar {
+    width: $font-size * 1.25;
+    height: $font-size * 1.25;
+  }
+
+  td .avatar {
+    width: $font-size * 0.75 * 1.4;
+    height: $font-size * 0.75 * 1.4;
+  }
+}
+
+.page--modules {
+  .avatar {
+    vertical-align: text-bottom;
+  }
+
+  @include avatar-size(16px);
+
+  @include breakpoint($medium) {
+    @include avatar-size(18px);
+  }
+
+  @include breakpoint($large) {
+    @include avatar-size(20px);
+  }
+
+  @include breakpoint($x-large) {
+    @include avatar-size(22px);
+  }
+}
