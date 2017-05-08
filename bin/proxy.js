@@ -77,18 +77,6 @@ Please try again by right-clicking and selecting "Run as administrator".
 `,
 };
 
-function tryRequire(name) {
-  try {
-    return require(name);
-  } catch (err) {
-    if (err.code === 'MODULE_NOT_FOUND') {
-      return null;
-    } else {
-      throw err;
-    }
-  }
-}
-
 function* objectKeys(obj) {
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
@@ -117,19 +105,7 @@ function objectMap(obj, func) {
 
 // parse args
 const argv = (() => {
-  const argparse = tryRequire('argparse');
-  if (!argparse) {
-    log.debug('"argparse" not installed; parsing command line standalone');
-
-    for (const arg of process.argv.slice(2)) {
-      if (!arg.startsWith('-')) {
-        return { config: arg };
-      }
-    }
-
-    return {};
-  }
-
+  const argparse = require('argparse');
   const argParser = new argparse.ArgumentParser();
 
   const verbosity = new Set(['-2', '-1', '0', '1', '2', '3']);
@@ -259,11 +235,7 @@ const config = (() => {
 
   // .yml / .yaml
   if (type === '.yml' || type === '.yaml') {
-    const yaml = tryRequire('js-yaml');
-    if (!yaml) {
-      log.error('"js-yaml" not found; install it for yaml config support');
-      return null;
-    }
+    const yaml = require('js-yaml');
 
     try {
       return yaml.safeLoad(data, { filename: configPath });
