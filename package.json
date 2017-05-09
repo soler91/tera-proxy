@@ -1,19 +1,24 @@
 {
   "name": "tera-proxy",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Easy script modding through modular network-based hooks.",
   "homepage": "https://meishuu.github.io/tera-proxy/",
   "bugs": "https://github.com/meishuu/tera-proxy/issues",
   "author": "meishu",
+  "files": [
+    "bin/config-sample.yml",
+    "bin/proxy.js",
+    "lib/"
+  ],
   "bin": "./bin/proxy.js",
   "repository": "meishuu/tera-proxy",
   "dependencies": {
     "argparse": "^1.0.9",
-    "baldera-logger": "meishuu/baldera-logger",
+    "baldera-logger": "^0.1.0",
     "js-yaml": "^3.8.3",
     "tera-data": "meishuu/tera-data",
-    "tera-proxy-game": "meishuu/tera-proxy-game",
-    "tera-proxy-sls": "meishuu/tera-proxy-sls",
+    "tera-proxy-game": "^1.0.0",
+    "tera-proxy-sls": "^0.2.0",
     "write-file-atomic": "^1.3.1"
   },
   "engines": {
