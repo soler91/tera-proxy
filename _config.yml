@@ -5,7 +5,7 @@ title_separator : "-"
 name            : "Meishu"
 description     : "Simple, easy, modular event handling through a TERA proxy server."
 url             : "https://meishuu.github.io"
-baseurl         : "/tera-proxy-test-pages" # TODO
+baseurl         : "/tera-proxy"
 repository      : "meishuu/tera-proxy"
 teaser          : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 
