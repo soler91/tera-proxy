@@ -474,7 +474,11 @@ if (config.dnsServers) {
 
 function makeSlsProxy(region, data, cb) {
   const { slsProxy } = data;
-  const all = (data.servers === '*');
+
+  const configServers = data.servers || '*';
+
+  const defaults = configServers.all || {};
+  const all = (configServers === '*') || Object.keys(configServers).every(k => k === 'all');
   const servers = (!all ? data.servers : {});
 
   slsProxy.fetch((err, gameServers) => {
@@ -491,6 +495,8 @@ function makeSlsProxy(region, data, cb) {
     const result = new Map();
 
     for (const [id, server] of objectIter(servers)) {
+      if (id === 'all') continue;
+
       const target = gameServers[id];
       if (!target) {
         log.warn({ region, id }, 'server not found; skipping');
@@ -499,10 +505,14 @@ function makeSlsProxy(region, data, cb) {
 
       const settings = Object.assign({
         connectHost: target.ip,
-        connectPort: target.port,
+        connectPort: parseInt(target.port, 10),
         listenHost: data.listenHost,
         listenPort: BASE_PORT + parseInt(id, 10),
-      }, servers[id]);
+      }, defaults, servers[id]);
+
+      if (settings.connectPort === 'listenPort') {
+        settings.connectPort = settings.listenPort;
+      }
 
       slsProxy.customServers[id] = {
         ip: settings.listenHost,
