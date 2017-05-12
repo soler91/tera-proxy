@@ -84,6 +84,14 @@ categories:
     desc: Automatically uses a Prime Replenishment Potable when under 50% MP.
   - repo: TeraProxy/Teabagger
     desc: but rly tho?
+  - repo: Bernkastel-0/costume-ex
+    desc: Allows wearing anything client-sided through UI selection.
+  - repo: Bernkastel-0/zfps-standard
+    desc: Allows toggling off other players and abilities to improve FPS.
+  - repo: Saegusae/fps-utils
+    desc: Alternative to Bernkastel's ZFPS.
+  - repo: Saegusae/fly-more
+    desc: Ignores flying mount stamina for infinite flying.
 ---
 
 Here is a directory with links to a number of GitHub projects and developers who work with tera-proxy or other TERA modding programs. That means **all projects directly linked here are free and open source**.
@@ -113,8 +121,10 @@ If you want to be added to this list, or you think a module has been miscategori
 For any other kind of module, you may want to take a look at public repositories or websites. Below is a list of module developers on GitHub, along with links to other sources where you may find more information or modules not publicly posted.
 
 * [{% avatar baldera-mods %} baldera-mods][@baldera-mods] &ndash; [{% avatar meishuu %} meishuu][@meishuu]'s mods
+* [{% avatar Bernkastel-0 %} Bernkastel-0][@Bernkastel-0] &ndash; [tumblr](http://teraproxy.tumblr.com/)
 * [{% avatar eemj %} eemj][@eemj]
 * [{% avatar pinkipi %} pinkipi][@pinkipi] &ndash; [Discord](https://discord.gg/RR9zf85)
+* [{% avatar Saegusae %} Saegusae][@Saegusae]
 * [{% avatar teralove %} teralove][@teralove]
 * [{% avatar TeraProxy %} TeraProxy][@TeraProxy]
 * [{% avatar wuaw %} wuaw][@wuaw]
@@ -134,13 +144,15 @@ tera-proxy is just one of many projects aimed at modding and extending TERA func
 
 [@alexrp]: <https://github.com/alexrp> "Alex Rønne Petersen"
 [@baldera-mods]: <https://github.com/baldera-mods> "Meishu's Baldera Mods"
+[@Bernkastel-0]: <https://github.com/Bernkastel-0> "Bernkastel"
 [@eemj]: <https://github.com/eemj> "Jamie"
 [@Foglio1024]: <https://github.com/Foglio1024> "Foglio"
-[@Gl0]: <https://github.com/Gl0>
+[@Gl0]: <https://github.com/Gl0> "Gl0"
 [@lunyx]: <https://github.com/lunyx> "Daniel"
 [@meishuu]: <https://github.com/meishuu> "Meishu"
 [@neowutran]: <https://github.com/neowutran> "Yukikoo"
 [@pinkipi]: <https://github.com/pinkipi> "Pinkie Pie"
+[@Saegusae]: <http://github.com/saegusae> "Seagoose"
 [@teralove]: <https://github.com/teralove>
 [@TeraProxy]: <https://github.com/TeraProxy>
 [@wuaw]: <https://github.com/wuaw>
