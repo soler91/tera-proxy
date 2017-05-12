@@ -91,13 +91,20 @@ Here is a directory with links to a number of GitHub projects and developers who
 If you want to be added to this list, or you think a module has been miscategorized, [submit a PR](https://github.com/meishuu/tera-proxy/edit/gh-pages/_pages/links.md).
 
 {% for category in page.categories %}
+{% assign names = "" | split: "" | where_exp: "item", "false" %}
+{% for module in category.modules %}
+{% assign repo = module.repo | split: "/" | last | downcase %}
+{% assign names = names | push: repo %}
+{% endfor %}
+{% assign names = names | uniq | sort %}
+
 ## {{ category.header }}
 
 {{ category.description }}
 
 | Module | Description |
-| --- | --- |{% for module in category.modules %}{% assign repo = module.repo | split: "/" %}{% assign user = module.author %}{% unless user %}{% assign user = repo[0] %}{% endunless %}
-| [{% avatar user=user %}][@{{ user }}] [{{ repo[1] }}](https://github.com/{{ module.repo }}) | {{ module.desc }} |{% endfor %}
+| --- | --- |{% for name in names %}{% for module in category.modules %}{% assign repo = module.repo | split: "/" %}{% assign test = repo | last | downcase %}{% if test != name %}{% continue %}{% endif %}{% assign user = module.author %}{% unless user %}{% assign user = repo[0] %}{% endunless %}
+| [{% avatar user=user %}][@{{ user }}] [{{ repo[1] }}](https://github.com/{{ module.repo }}) | {{ module.desc }} |{% endfor %}{% endfor %}
 
 {% endfor %}
 
