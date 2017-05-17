@@ -50,6 +50,8 @@ categories:
     desc: Return to lobby (character select) via chat command.
   - repo: teralove/no-directional-skills
     desc: Removes directional input on some skills.
+  - repo: Mister-Kay/no-more-crazy-capes
+    desc: Removes exploding physics glitch from some back items.
   - repo: teralove/parcel-helper
     desc: Instantly accept all parcels and delete all read messages.
   - repo: teralove/party-death-markers
@@ -96,7 +98,7 @@ categories:
 
 Here is a directory with links to a number of GitHub projects and developers who work with tera-proxy or other TERA modding programs. That means **all projects directly linked here are free and open source**.
 
-If you want to be added to this list, or you think a module has been miscategorized, [submit a PR](https://github.com/meishuu/tera-proxy/edit/gh-pages/_pages/links.md).
+If you want to be added to this list, or you think a module has been miscategorized, [submit a PR](https://github.com/meishuu/tera-proxy/edit/gh-pages/_pages/modules.md).
 
 {% for category in page.categories %}
 {% assign names = "" | split: "" | where_exp: "item", "false" %}
@@ -150,6 +152,7 @@ tera-proxy is just one of many projects aimed at modding and extending TERA func
 [@Gl0]: <https://github.com/Gl0> "Gl0"
 [@lunyx]: <https://github.com/lunyx> "Daniel"
 [@meishuu]: <https://github.com/meishuu> "Meishu"
+[@Mister-Kay]: <https://github.com/mister-kay>
 [@neowutran]: <https://github.com/neowutran> "Yukikoo"
 [@pinkipi]: <https://github.com/pinkipi> "Pinkie Pie"
 [@Saegusae]: <http://github.com/saegusae> "Seagoose"
