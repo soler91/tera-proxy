@@ -90,8 +90,10 @@ categories:
     desc: Allows wearing anything client-sided through UI selection.
   - repo: Bernkastel-0/zfps-standard
     desc: Allows toggling off other players and abilities to improve FPS.
+  - repo: Saegusae/loot
+    desc: Automatically loots items in a radius upon pressing F on an item.
   - repo: Saegusae/fps-utils
-    desc: Alternative to Bernkastel's ZFPS.
+    desc: A compilation of utilities to improve fps, includes disabling fireworks effects.
   - repo: Saegusae/fly-more
     desc: Ignores flying mount stamina for infinite flying.
 ---
