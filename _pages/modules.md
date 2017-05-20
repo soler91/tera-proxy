@@ -50,6 +50,8 @@ categories:
     desc: Return to lobby (character select) via chat command.
   - repo: teralove/no-directional-skills
     desc: Removes directional input on some skills.
+  - repo: Mister-Kay/no-more-command-typos
+    desc: Prevents submitting accidental typos for other modules' "!" prefixed commands.
   - repo: Mister-Kay/no-more-crazy-capes
     desc: Removes exploding physics glitch from some back items.
   - repo: teralove/parcel-helper
