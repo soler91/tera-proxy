@@ -98,6 +98,8 @@ categories:
     desc: A compilation of utilities to improve fps, includes disabling fireworks effects.
   - repo: Saegusae/fly-more
     desc: Ignores flying mount stamina for infinite flying.
+  - repo: soler91/CustomMounts
+    desc: Use any mount (Clientside).
 ---
 
 Here is a directory with links to a number of GitHub projects and developers who work with tera-proxy or other TERA modding programs. That means **all projects directly linked here are free and open source**.
@@ -131,6 +133,7 @@ For any other kind of module, you may want to take a look at public repositories
 * [{% avatar eemj %} eemj][@eemj]
 * [{% avatar pinkipi %} pinkipi][@pinkipi] &ndash; [Discord](https://discord.gg/RR9zf85)
 * [{% avatar Saegusae %} Saegusae][@Saegusae]
+* [{% avatar soler91 %} soler91][@soler91]
 * [{% avatar teralove %} teralove][@teralove]
 * [{% avatar TeraProxy %} TeraProxy][@TeraProxy]
 * [{% avatar wuaw %} wuaw][@wuaw]
@@ -160,6 +163,7 @@ tera-proxy is just one of many projects aimed at modding and extending TERA func
 [@neowutran]: <https://github.com/neowutran> "Yukikoo"
 [@pinkipi]: <https://github.com/pinkipi> "Pinkie Pie"
 [@Saegusae]: <http://github.com/saegusae> "Seagoose"
+[@soler91]: <http://github.com/soler91> "Fruit"
 [@teralove]: <https://github.com/teralove>
 [@TeraProxy]: <https://github.com/TeraProxy>
 [@wuaw]: <https://github.com/wuaw>
