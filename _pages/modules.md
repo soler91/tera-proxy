@@ -69,6 +69,8 @@ categories:
     desc: No more mashing Esc after killing a boss. Pretend cutscenes don't even exist.
   - repo: wuaw/timestamps
     desc: Shows timestamps in chat.
+  - repo: soler91/AfkRewards
+    desc: Accepts Allegiance event rewards automatically.
 - header: The Questionable Ones
   description: "Where the line starts getting blurred. If you use these and it gets noticed... Well, no promises."
   modules:
