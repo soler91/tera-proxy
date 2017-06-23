@@ -72,7 +72,7 @@ categories:
   - repo: soler91/AfkRewards
     desc: Accepts Allegiance event rewards automatically.
   - repo: soler91/NameChanger
-    desc: Changes your name clientside.
+    desc: Changes your name and title clientside.
 - header: The Questionable Ones
   description: "Where the line starts getting blurred. If you use these and it gets noticed... Well, no promises."
   modules:
